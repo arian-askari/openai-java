@@ -3,6 +3,25 @@ package com.theokanning.openai.completion.chat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
+import java.util.List;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class MessageContent {
+    @NonNull
+    private String type; // Could be "text", "image_url", etc.
+
+    private String text; // Used if type is "text"
+    private ImageUrl imageUrl; // Used if type is "image_url"
+}
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+class ImageUrl {
+    private String url; // The Base64 encoded image URL
+}
 
 /**
  * <p>Each object has a role (either "system", "user", or "assistant") and content (the content of the message). Conversations can be as short as 1 message or fill many pages.</p>
@@ -26,8 +45,9 @@ public class ChatMessage {
 	 */
 	@NonNull
 	String role;
-	@JsonInclude() // content should always exist in the call, even if it is null
-	String content;
+	// Object to accept either String or List<MessageContent>
+	@JsonInclude(JsonInclude.Include.NON_NULL)
+	private Object content;
 	//name is optional, The name of the author of this message. May contain a-z, A-Z, 0-9, and underscores, with a maximum length of 64 characters.
 	String name;
 	@JsonProperty("function_call")
@@ -37,11 +57,25 @@ public class ChatMessage {
 		this.role = role;
 		this.content = content;
 	}
-
+	
+	public ChatMessage(String role, List<MessageContent> content) {
+	        this.role = role;
+	        this.content = content;
+	}
+	
 	public ChatMessage(String role, String content, String name) {
 		this.role = role;
 		this.content = content;
 		this.name = name;
 	}
+
+	// Setters to handle both types of content
+	public void setContent(String content) {
+		this.content = content;
+	}
+	public void setContent(List<MessageContent> content) {
+        	this.content = content;
+    	}
+	
 
 }
